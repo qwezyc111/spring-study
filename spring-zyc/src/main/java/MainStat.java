@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 @ComponentScan("com.zzz")
 public class MainStat {
 	public static void main(String[] args) {
+		// spring上下文
 		ApplicationContext context=new AnnotationConfigApplicationContext(MainStat.class);
 		UserServiceImpl bean = context.getBean(UserServiceImpl.class);
 		bean.sayHi();
