@@ -86,6 +86,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
 		this();
 		register(componentClasses);
+		// 刷新IOC容器
 		refresh();
 	}
 

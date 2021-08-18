@@ -123,10 +123,13 @@ abstract class ConfigurationClassUtils {
 		}
 
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
+		// 判断当前的BeanDefinition是否实现了@Configuration
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
+			// 实现了@ConFiguration，则设置为full
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
 		else if (config != null || isConfigurationCandidate(metadata)) {
+			// 未实现@Configuration，则设置为lite
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {
@@ -155,7 +158,7 @@ abstract class ConfigurationClassUtils {
 			return false;
 		}
 
-		// Any of the typical annotations found?
+		// class上标注了@Component、@ComponentScan、@Import等注解
 		for (String indicator : candidateIndicators) {
 			if (metadata.isAnnotated(indicator)) {
 				return true;
