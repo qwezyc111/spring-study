@@ -1,4 +1,4 @@
-package com.zzz;
+package com.zzz.able;
 
 import org.springframework.stereotype.Service;
 
