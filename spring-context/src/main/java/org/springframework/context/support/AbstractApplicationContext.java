@@ -522,29 +522,29 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// Tell the subclass to refresh the internal bean factory.
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
-			// Prepare the bean factory for use in this context.
+			// 对bean工厂进行属性填充 注册解析接口方式的监听器的BeanPostProcessor
 			prepareBeanFactory(beanFactory);
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
 				postProcessBeanFactory(beanFactory);
 
-				// 调用Bean工厂的后置处理器
+				// 调用Bean工厂的后置处理器 1、会在此将class扫描成bean定义
 				invokeBeanFactoryPostProcessors(beanFactory);
 
-				// Register bean processors that intercept bean creation.
+				// 注册bean的后置处理器
 				registerBeanPostProcessors(beanFactory);
 
-				// Initialize message source for this context.
+				// 初始化国际资源处理器
 				initMessageSource();
 
-				// Initialize event multicaster for this context.
+				// 创建事件多播器 管理所有的监听器，负责调用事件对应的监听器
 				initApplicationEventMulticaster();
 
-				// Initialize other special beans in specific context subclasses.
+				// 这个方法同样也是留个子类实现的 springboot也是从这个方法进行启动tomcat的
 				onRefresh();
 
-				// Check for listener beans and register them.
+				// 把我们的事件监听器注册到多播器上
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
@@ -762,7 +762,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
 	protected void initApplicationEventMulticaster() {
+		// 获取bean工厂
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		// 判断容器中有没有时间多播器
 		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster =
 					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
@@ -822,19 +824,22 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Doesn't affect other listeners, which can be added without being beans.
 	 */
 	protected void registerListeners() {
-		// Register statically specified listeners first.
+		// 获取容器中所有的监听器对象
+		// 这个时候正常流程是不会有监听器的，除非手动调用addApplicationListeners()
 		for (ApplicationListener<?> listener : getApplicationListeners()) {
+			// 把监听器挨个的注册到我们的多播器上去
 			getApplicationEventMulticaster().addApplicationListener(listener);
 		}
 
-		// Do not initialize FactoryBeans here: We need to leave all regular beans
-		// uninitialized to let post-processors apply to them!
+		// 防止懒加载的漏网
+		// 获取bean定义中的监听器对象,接口方式的监听就是在这里注册到多播器里面的
 		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
+		// 把监听器的名称注册到我们的多播器上
 		for (String listenerBeanName : listenerBeanNames) {
 			getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);
 		}
 
-		// Publish early application events now that we finally have a multicaster...
+		//
 		Set<ApplicationEvent> earlyEventsToProcess = this.earlyApplicationEvents;
 		this.earlyApplicationEvents = null;
 		if (!CollectionUtils.isEmpty(earlyEventsToProcess)) {

@@ -243,12 +243,15 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * The instance will be cached for a singleton, and create on each call to
 	 * {@code getObject()} for a proxy.
 	 * @return a fresh AOP proxy reflecting the current state of this factory
+	 * 放入IOC容器的就是这个方法返回的对象
 	 */
 	@Override
 	@Nullable
 	public Object getObject() throws BeansException {
+		// 初始化通知链
 		initializeAdvisorChain();
 		if (isSingleton()) {
+			// 创建动态代理，并返回代理对象
 			return getSingletonInstance();
 		}
 		else {
@@ -325,6 +328,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			}
 			// Initialize the shared singleton instance.
 			super.setFrozen(this.freezeProxy);
+			// 创建动态代理
 			this.singletonInstance = getProxy(createAopProxy());
 		}
 		return this.singletonInstance;

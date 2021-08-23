@@ -83,7 +83,7 @@ public class MainStart {
         singletonFactories.put(beanName, () -> new JdkProxyBeanPostProcessor().getEarlyBeanReference(earlySingletonObjects.get(beanName),beanName));
 
         // 添加到二级缓存
-        // earlySingletonObjects.put(beanName,instanceBean);
+         earlySingletonObjects.put(beanName,instanceBean);
 
         // 属性赋值
         Field[] declaredFields = beanClass.getDeclaredFields();

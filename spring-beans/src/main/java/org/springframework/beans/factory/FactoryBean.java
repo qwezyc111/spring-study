@@ -91,6 +91,7 @@ public interface FactoryBean<T> {
 	 * @return an instance of the bean (can be {@code null})
 	 * @throws Exception in case of creation errors
 	 * @see FactoryBeanNotInitializedException
+	 * 实现了FactoryBean接口的类，放入IOC容器中的bean，就是getObject这个方法返回的结果对象
 	 */
 	@Nullable
 	T getObject() throws Exception;
