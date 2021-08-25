@@ -68,8 +68,10 @@ public class BeanFactoryAdvisorRetrievalHelper {
 		// Determine list of advisor bean names, if not cached already.
 		String[] advisorNames = this.cachedAdvisorBeanNames;
 		if (advisorNames == null) {
-			// Do not initialize FactoryBeans here: We need to leave all regular beans
-			// uninitialized to let the auto-proxy creator apply to them!
+			/*
+			去我们的容器中获取到实现了Advisor接口的实现类
+			而我们的事务注解@EnableTransactionManagement导入了一个叫ProxyTransactionManagement
+			 */
 			advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 					this.beanFactory, Advisor.class, true, false);
 			this.cachedAdvisorBeanNames = advisorNames;

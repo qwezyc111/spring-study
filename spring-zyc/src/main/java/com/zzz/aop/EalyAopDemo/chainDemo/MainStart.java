@@ -15,12 +15,16 @@ import java.util.List;
 /***
  * @Author 徐庶   QQ:1092002729
  * @Slogan 致敬大师，致敬未来的你
+ * 早期AOP责任链实现原理
+ * 一个集合，一个递归或者循环
+ * 一个增强类需要写一个ProxyFactoryBean，增强是通过责任链来调用的
  */
 public class MainStart {
 
     public static void main(String[] args) throws Throwable {
         // 把一条链上的都初始化
         List<MethodInterceptor> list=new ArrayList<>();
+        // 责任链统一抽象
         list.add(new MethodBeforeAdviceInterceptor(new TulingLogBeforeAdvice()));
         list.add(new TulingLogInterceptor());
 
@@ -45,6 +49,7 @@ public class MainStart {
             }
             MethodInterceptor mi = list.get(i);
             i++;
+            // 传入this，继续调用proceed
            return  mi.invoke(this);
         }
 

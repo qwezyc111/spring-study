@@ -90,6 +90,9 @@ public abstract class AopConfigUtils {
 
 	@Nullable
 	public static BeanDefinition registerAspectJAnnotationAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
+		/*
+		往里看
+		 */
 		return registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry, null);
 	}
 
@@ -97,6 +100,10 @@ public abstract class AopConfigUtils {
 	public static BeanDefinition registerAspectJAnnotationAutoProxyCreatorIfNecessary(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
 
+		/*
+		在refresh的invokeBeanFactoryPostProcessor时往bdMap中注册一个 AOP核心类
+		再调用refresh的regiserBeanPostProcessor把上面这个bd实例化到BeanPostProcessors中去
+		 */
 		return registerOrEscalateApcAsRequired(AnnotationAwareAspectJAutoProxyCreator.class, registry, source);
 	}
 
@@ -131,11 +138,16 @@ public abstract class AopConfigUtils {
 			}
 			return null;
 		}
-
+		/*
+		声明一个bean定义
+		 */
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
 		beanDefinition.setSource(source);
 		beanDefinition.getPropertyValues().add("order", Ordered.HIGHEST_PRECEDENCE);
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		/*
+		注册到bdMap中
+		 */
 		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
 		return beanDefinition;
 	}

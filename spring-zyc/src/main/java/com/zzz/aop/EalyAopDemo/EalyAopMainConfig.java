@@ -37,19 +37,25 @@ public class EalyAopMainConfig {
 	public TulingLogBeforeAdvice tulingLogBeforeAdvice() {
 		return new TulingLogBeforeAdvice();
 	}
+	/*
+	 * Advice
 
 	@Bean
 	public TulingLogAfterAdvice tulingLogAfterAdvice() {
 		return new TulingLogAfterAdvice();
 	}
 
+	 */
+
 	/*
 	 * Interceptor方式 ， 可以理解为环绕通知
-	 */
+
 	@Bean
 	public TulingLogInterceptor tulingLogInterceptor() {
 		return new TulingLogInterceptor();
 	}
+
+	 */
 
 	/*
 	 * 一个增强类 就需要一个ProxyFactoryBean
@@ -57,7 +63,7 @@ public class EalyAopMainConfig {
 	 * 如果多个Bean需要创建多个ProxyFactoryBean 。
 	 * 而且，我们看到，我们的拦截器的粒度只控制到了类级别，类中所有的方法都进行了拦截。
 	 * 接下来，我们看看怎么样只拦截特定的方法。
-	 */
+
 	@Bean
 	public ProxyFactoryBean calculateProxy1() {
 		ProxyFactoryBean userService = new ProxyFactoryBean();
@@ -69,28 +75,28 @@ public class EalyAopMainConfig {
 		return userService;
 	}
 
+	 */
 
-	/**
+
+	/*
 	 * Advisor 种类很多：
 	 * RegexpMethodPointcutAdvisor 按正则匹配类
 	 * NameMatchMethodPointcutAdvisor 按方法名匹配
 	 * DefaultBeanFactoryPointcutAdvisor xml解析的Advisor   <aop:before
 	 * InstantiationModelAwarePointcutAdvisorImpl  注解解析的advisor(@Before @After....)
-	 *
-	 * @return*
+	 * advisor解决了 增强哪个方法的问题
 	 */
-	/*
 	@Bean
 	public NameMatchMethodPointcutAdvisor tulingLogAspectAdvisor() {
 		NameMatchMethodPointcutAdvisor advisor = new NameMatchMethodPointcutAdvisor();
 		// 通知(Advice)  ：是我们的通知类 没有带切点
 		// 通知者(Advisor)：是经过包装后的细粒度控制方式。 带了切点
-		advisor.setAdvice(tulingLogAdvice());
+		advisor.setAdvice(tulingLogBeforeAdvice());
 		advisor.setMappedNames("div");
 		return advisor;
 	}
 
-	 */
+
 
 
 
@@ -103,34 +109,40 @@ public class EalyAopMainConfig {
         return  advisor;
     }*/
 
-	/**
+	/*
 	 * FactoryBean方式单个： ProxyFactoryBean
 	 *  控制粒度到方法
 	 *  问题：如果我们只能指定单一的Bean的AOP，
-	 *      如果多个Bean需要创建多个ProxyFactoryBean 。
-	 * @return
-	 @Bean public ProxyFactoryBean calculateProxy(){
-	 ProxyFactoryBean userService=new ProxyFactoryBean();
-	 userService.setInterceptorNames("tulingLogAspectAdvisor");
-	 userService.setTarget(tulingCalculate());
-	 return userService;
-	 }*/
+	 *  如果多个Bean需要创建多个ProxyFactoryBean 。
 
+	@Bean
+	public ProxyFactoryBean calculateProxy1() {
+		ProxyFactoryBean userService = new ProxyFactoryBean();
+		// 设置拦截器
+		userService.setInterceptorNames("tulingLogAspectAdvisor");
+		// 设置增强目标
+		userService.setTarget(tulingCalculate());
+		return userService;
+	}
 
-	/**
-	 * autoProxy: BeanPostProcessor手动指定Advice方式  BeanNameAutoProxyCreator
-	 *
-	 * @return
-
-	 @Bean public BeanNameAutoProxyCreator autoProxyCreator() {
-	 BeanNameAutoProxyCreator beanNameAutoProxyCreator = new BeanNameAutoProxyCreator();
-	 //设置要创建代理的那些Bean的名字
-	 beanNameAutoProxyCreator.setBeanNames("tuling*");
-	 //设置拦截链名字(这些拦截器是有先后顺序的)
-	 beanNameAutoProxyCreator.setInterceptorNames("tulingLogAspectAdvisor");
-	 return beanNameAutoProxyCreator;
-	 }
 	 */
+
+
+	/*
+	 autoProxy: BeanPostProcessor手动指定Advice方式  BeanNameAutoProxyCreator
+	 autoProxy自动代理解决了每次增强都需要写一个ProxyFactoryBean的繁琐过程
+	 */
+	@Bean
+	public BeanNameAutoProxyCreator autoProxyCreator() {
+		BeanNameAutoProxyCreator beanNameAutoProxyCreator = new BeanNameAutoProxyCreator();
+		//设置要创建代理的那些Bean的名字
+		beanNameAutoProxyCreator.setBeanNames("tuling*");
+		//设置拦截链名字(这些拦截器是有先后顺序的)
+		beanNameAutoProxyCreator.setInterceptorNames("tulingLogAspectAdvisor");
+		return beanNameAutoProxyCreator;
+	}
+
+
 
 	/**
 	 * BeanPostProcessor自动扫描Advisor方式  DefaultAdvisorAutoProxyCreator

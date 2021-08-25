@@ -31,6 +31,9 @@ import org.springframework.core.type.AnnotationMetadata;
  * @since 3.1
  * @see EnableAspectJAutoProxy
  */
+/*
+注意它实现的接口
+ */
 class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 
 	/**
@@ -38,10 +41,19 @@ class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 	 * of the @{@link EnableAspectJAutoProxy#proxyTargetClass()} attribute on the importing
 	 * {@code @Configuration} class.
 	 */
+	/*
+	解析配置类的时候会调用这个方法
+	refresh->invokeBeanFactoryPostProcessor->解析@Import->解析ImportBeanDefinitionRegister->loadBeanDefinition
+	@Import和@Component不同，@Component是解析到就会转换成bd注册到map中，@Import是解析完配置类之后调用loadBefinition再去注册bd
+
+	 */
 	@Override
 	public void registerBeanDefinitions(
 			AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 
+		/*
+		注册一个bean定义
+		 */
 		AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry);
 
 		AnnotationAttributes enableAspectJAutoProxy =

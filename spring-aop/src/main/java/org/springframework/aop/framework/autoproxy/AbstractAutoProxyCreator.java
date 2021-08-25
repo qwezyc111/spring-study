@@ -243,12 +243,23 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
+		/*
+		构建我们的缓存key
+		 */
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
 		if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
+			/*
+			被解析过，直接返回
+			 */
 			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
+			/*
+			注意看重写方法
+			判断是不是基础的bean（是不是切面类、通知、切点等）
+			判断是不是应该跳过 默认false（切面解析也在其中）
+			 */
 			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
 				this.advisedBeans.put(cacheKey, Boolean.FALSE);
 				return null;
@@ -371,6 +382,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @see #shouldSkip
 	 */
 	protected boolean isInfrastructureClass(Class<?> beanClass) {
+		/*
+		加入当前正在创建的Bean的class
+		是Advice、PointCut、Advisor、AopInfrastructureBean
+		直接跳过不需要解析
+		 */
 		boolean retVal = Advice.class.isAssignableFrom(beanClass) ||
 				Pointcut.class.isAssignableFrom(beanClass) ||
 				Advisor.class.isAssignableFrom(beanClass) ||

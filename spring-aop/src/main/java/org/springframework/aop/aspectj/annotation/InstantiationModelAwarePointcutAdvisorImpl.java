@@ -40,6 +40,7 @@ import org.springframework.lang.Nullable;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
+ * 每一个通知都会被封装成这个advisor
  */
 @SuppressWarnings("serial")
 final class InstantiationModelAwarePointcutAdvisorImpl
@@ -47,7 +48,9 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 	private static final Advice EMPTY_ADVICE = new Advice() {};
 
-
+	/*
+	负责解析切点
+	 */
 	private final AspectJExpressionPointcut declaredPointcut;
 
 	private final Class<?> declaringClass;

@@ -83,7 +83,16 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @param componentClasses one or more component classes &mdash; for example,
 	 * {@link Configuration @Configuration} classes
 	 */
+	/*
+	根据参数类型可以知道，其实可以传入多个annotatedClasses，但是这种情况出现的比较少
+	 */
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+		/*
+		调用无参构造函数，会先调用父类GenericApplicationContext的构造函数
+		父类的构造函数里面就是初始化DefaultListableBeanFactory，并赋值给beanFactory
+		本类的构造函数里面，初始化了一个读取器：AnnotatedBeanDefinitionReader read，一个扫描器ClassPathBeanDefinitionScanner scanner
+		scanner的用处不是很大，它仅仅是在我们外部手动调用，scan等方法才有用，常规方式是不会用到scanner对象的
+		 */
 		this();
 		register(componentClasses);
 		// 刷新IOC容器

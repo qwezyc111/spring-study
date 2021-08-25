@@ -547,7 +547,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// 把我们的事件监听器注册到多播器上
 				registerListeners();
 
-				// Instantiate all remaining (non-lazy-init) singletons.
+				// 实例化我们剩余的单例bean
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
@@ -880,7 +880,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Allow for caching all bean definition metadata, not expecting further changes.
 		beanFactory.freezeConfiguration();
 
-		// Instantiate all remaining (non-lazy-init) singletons.
+		// 实例化剩余的单实例bean
 		beanFactory.preInstantiateSingletons();
 	}
 
