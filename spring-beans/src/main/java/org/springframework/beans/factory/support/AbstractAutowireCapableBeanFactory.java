@@ -426,8 +426,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		Object result = existingBean;
+		/*
+		获取我们容器中的所有的bean的后置处理器
+		 */
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
+			/*
+			这里是后置处理器的【第九次调用】 aop和事务都会在这里生成代理对象
+			【很重要】
+			我们AOP @EnableAspectJAutoProxy 为我们容器中导入了AnnotationAwareAspectJAutoProxyCreator
+			我们事务注解@EnableTransactionManagement 为我们容器中导入了 InfrastructureAdvisorAutoProxyCreator
+			都是实现了我们的 BeanPostProcessor接口，InstantiationAwareBeanPostProcessor，
+			在这里实现的是BeanPostProcessor接口的postProcessAfterInitialization来生成我们的代理对象
+			 */
 			Object current = processor.postProcessAfterInitialization(result, beanName);
+			/*
+			若只要有一个返回null，那么直接返回原始的
+			 */
 			if (current == null) {
 				return result;
 			}
@@ -1808,6 +1822,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
+			/*
+			调用我们的bean的后置处理器的PostProcessorsAfterInitialization方法
+			 */
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
 

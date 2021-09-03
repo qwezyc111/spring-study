@@ -84,6 +84,9 @@ public final class AopContext {
 	static Object setCurrentProxy(@Nullable Object proxy) {
 		Object old = currentProxy.get();
 		if (proxy != null) {
+			/*
+			放入到ThreadLocal中
+			 */
 			currentProxy.set(proxy);
 		}
 		else {

@@ -86,15 +86,41 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 	public InstantiationModelAwarePointcutAdvisorImpl(AspectJExpressionPointcut declaredPointcut,
 			Method aspectJAdviceMethod, AspectJAdvisorFactory aspectJAdvisorFactory,
 			MetadataAwareAspectInstanceFactory aspectInstanceFactory, int declarationOrder, String aspectName) {
-
+		/*
+		当前的切点
+		 */
 		this.declaredPointcut = declaredPointcut;
+		/*
+		切面的class对象
+		 */
 		this.declaringClass = aspectJAdviceMethod.getDeclaringClass();
+		/*
+		切面方法的名称
+		 */
 		this.methodName = aspectJAdviceMethod.getName();
+		/*
+		切面方法的参数类型
+		 */
 		this.parameterTypes = aspectJAdviceMethod.getParameterTypes();
+		/*
+		切面方法对象
+		 */
 		this.aspectJAdviceMethod = aspectJAdviceMethod;
+		/*
+		aspectJ的通知工厂
+		 */
 		this.aspectJAdvisorFactory = aspectJAdvisorFactory;
+		/*
+		aspectJ的实例工厂
+		 */
 		this.aspectInstanceFactory = aspectInstanceFactory;
+		/*
+		advisor顺序
+		 */
 		this.declarationOrder = declarationOrder;
+		/*
+		切面名称
+		 */
 		this.aspectName = aspectName;
 
 		if (aspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) {

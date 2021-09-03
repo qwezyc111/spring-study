@@ -234,9 +234,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		return null;
 	}
 
+	/*
+	循环依赖会调用
+	 */
 	@Override
 	public Object getEarlyBeanReference(Object bean, String beanName) {
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
+		/*
+		放入集合
+		 */
 		this.earlyProxyReferences.put(cacheKey, bean);
 		return wrapIfNecessary(bean, beanName, cacheKey);
 	}
@@ -305,9 +311,22 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	@Override
 	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
+		/*
+		第一次创建bean的时候拿到了所有的advisor
+		每个bean创建的时候都会解析一遍切面，除了第一次后面都是从缓存中去拿切面
+		 */
 		if (bean != null) {
+			/*
+			获取缓存key
+			 */
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
+			/*
+			之前循环依赖创建的动态代理，如果是现在的bean，就不再创建，并且移除
+			 */
 			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
+				/*
+				该方法将返回动态代理实例
+				 */
 				return wrapIfNecessary(bean, beanName, cacheKey);
 			}
 		}
@@ -344,23 +363,47 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @return a proxy wrapping the bean, or the raw bean instance as-is
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+		/*
+		已经被处理过（解析切面时targetSourcedBeans出现过）
+		就是自己实现创建动态代理逻辑
+		 */
 		if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
 			return bean;
 		}
+		/*
+		advicedBean不需要增强
+		 */
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
 			return bean;
 		}
+		/*
+		是不是基础的bean 是不是需要跳过的 重复判断（因为循环依赖是可以改变bean的，）
+		 */
 		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
 			this.advisedBeans.put(cacheKey, Boolean.FALSE);
 			return bean;
 		}
 
-		// Create proxy if we have advice.
+		/*
+		根据当前bean找到匹配的advisor
+		 */
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
+		/*
+		当前bean匹配到了advisor
+		 */
 		if (specificInterceptors != DO_NOT_PROXY) {
+			/*
+			标记为已处理
+			 */
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
+			/*
+			创建我们真正的代理对象
+			 */
 			Object proxy = createProxy(
 					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
+			/*
+			加入到缓存
+			 */
 			this.proxyTypes.put(cacheKey, proxy.getClass());
 			return proxy;
 		}
@@ -462,12 +505,20 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
 			AutoProxyUtils.exposeTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName, beanClass);
 		}
-
+		/*
+		创建一个代理对象工厂
+		 */
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.copyFrom(this);
 
+		/*
+		为proxyFactory设置创建jdk代理还是cglib代理
+		如果设置了<aop:aspectj-autoproxy proxy-target-class="true"/>不会进if，强制使用cglib
+		 */
 		if (proxyFactory.isProxyTargetClass()) {
-			// Explicit handling of JDK proxy targets (for introduction advice scenarios)
+			/*
+			内部设置的，配置类就会设置这个属性
+			 */
 			if (Proxy.isProxyClass(beanClass)) {
 				// Must allow for introductions; can't just set interfaces to the proxy's interfaces only.
 				for (Class<?> ifc : beanClass.getInterfaces()) {
@@ -481,20 +532,38 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 				proxyFactory.setProxyTargetClass(true);
 			}
 			else {
+				/*
+				检查有没有接口
+				 */
 				evaluateProxyInterfaces(beanClass, proxyFactory);
 			}
 		}
-
+		/*
+		把我们的specificInterceptors数组中的Advisor转化为数组形式的
+		 */
 		Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
+		/*
+		为我们的代理工厂加入通知器
+		 */
 		proxyFactory.addAdvisors(advisors);
+		/*
+		设置targetSource对象
+		 */
 		proxyFactory.setTargetSource(targetSource);
 		customizeProxyFactory(proxyFactory);
 
 		proxyFactory.setFrozen(this.freezeProxy);
+		/*
+		代表之前是否筛选advise
+		因为继承了AbstractAdvisorAutoProxyCreator，
+		并且之前调用了findEligibleAdvisors进行筛选
+		 */
 		if (advisorsPreFiltered()) {
 			proxyFactory.setPreFiltered(true);
 		}
-
+		/*
+		真正的创建代理对象
+		 */
 		return proxyFactory.getProxy(getProxyClassLoader());
 	}
 

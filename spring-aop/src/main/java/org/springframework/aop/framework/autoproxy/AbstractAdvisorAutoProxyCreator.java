@@ -75,7 +75,13 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	protected Object[] getAdvicesAndAdvisorsForBean(
 			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
 
+		/*
+		找到和当前bean匹配的advisor
+		 */
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
+		/*
+		如果没找到 不创建代理
+		 */
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
 		}
@@ -93,9 +99,18 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #extendAdvisors
 	 */
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
+		/*
+		拿到接口方式的AOP(这次是从缓存中拿了)
+		 */
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
+		/*
+		判断我们的通知能不能作用到当前的类上（切点是否命中当前bean）
+		 */
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
 		extendAdvisors(eligibleAdvisors);
+		/*
+		对我们的advisor进行排序
+		 */
 		if (!eligibleAdvisors.isEmpty()) {
 			eligibleAdvisors = sortAdvisors(eligibleAdvisors);
 		}
@@ -123,8 +138,14 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	protected List<Advisor> findAdvisorsThatCanApply(
 			List<Advisor> candidateAdvisors, Class<?> beanClass, String beanName) {
 
+		/*
+		用来记录当前正在创建的被代理对象的名称
+		 */
 		ProxyCreationContext.setCurrentProxiedBeanName(beanName);
 		try {
+			/*
+			从候选的通知器中找到当前bean关联的advisors
+			 */
 			return AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
 		}
 		finally {
